@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.khan.imran</groupId>
 	<artifactId>devops-challenge</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>devops-challenge</name>
 	<description>Imran Khan Challenge Demo project for Spring Boot</description>
 	<properties>
