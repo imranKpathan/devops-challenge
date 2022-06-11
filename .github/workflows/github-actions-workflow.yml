@@ -15,7 +15,7 @@ jobs:
   initialization:
     runs-on: ubuntu-latest
     outputs:
-      new_version: ${{ steps.DetermineNextTagVersion.outputs.new_tag }}
+      next_version: ${{ steps.DetermineNextTagVersion.outputs.new_tag }}
       current_version: ${{ steps.DetermineNextTagVersion.outputs.tag }}
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -40,6 +40,8 @@ jobs:
           server-id: github
       - name: Build with Maven
         run: mvn clean package 
+      - name: Print Next Tag
+        run: echo $next_version
   publish:
     runs-on: ubuntu-latest 
     needs: [initialization, build]
