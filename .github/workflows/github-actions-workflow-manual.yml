@@ -1,7 +1,25 @@
 name: GitHub Actions Demo
 on:
-  push:
-    branches: [ "main" ]
+  # Allows you to run this workflow manually from the Actions tab.
+  workflow_dispatch:
+    inputs:
+      defaultBump:
+        description: 'Which type of bump to use when none explicitly provided'
+        required: true
+        default: 'minor' 
+        type: choice
+        options:
+        - major
+        - minor
+        - patch 
+      createRelease:
+        description: 'True to create new release & tag with version'
+        required: true 
+        type: boolean 
+      publishPackage:
+        description: 'True to publish package to GitHub Packages'
+        required: true 
+        type: boolean 
 jobs:
   Initialization:
     runs-on: ubuntu-latest
@@ -11,13 +29,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Determine Next Tag Version
+        if:  ${{ inputs.defaultBump}}
         id: DetermineNextTagVersion
         uses: anothrNick/github-tag-action@1.39.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERBOSE: true
           DRY_RUN: true
-          DEFAULT_BUMP: 'patch'
+          DEFAULT_BUMP: '${{ inputs.defaultBump}}'
   Build:
     runs-on: ubuntu-latest
     steps:
@@ -42,6 +61,7 @@ jobs:
       - name: Set Release version
         run: mvn versions:set -DnewVersion=${{needs.Initialization.outputs.next_version}}
       - name: Publish to GitHub Packages Apache Maven 
+        if:  ${{ inputs.publishPackage != 'false'}}
         run: mvn --batch-mode -DuseGitHubPackages=true deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,18 +73,21 @@ jobs:
     - name: Print Next Tag
       run: echo ${{needs.Initialization.outputs.next_version}}
     - name: Create a Release  
+      if:  ${{ inputs.createRelease != 'false'}}
       uses: elgohr/Github-Release-Action@v4
       env:
         GITHUB_TOKEN: ${{ secrets.IMK_RELEASE_TOKEN }}
       with:
         title: ${{needs.Initialization.outputs.next_version}}
     - name: Tag Version 
+      if:  ${{ inputs.createRelease != 'false'}}
       uses: anothrNick/github-tag-action@1.39.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BUMP: patch
     - name: Tag Version 
+      if:  ${{ inputs.createRelease != 'false'}}
       uses: anothrNick/github-tag-action@1.39.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: '${{ inputs.defaultBump}}'
         DEFAULT_BUMP: 'patch'
