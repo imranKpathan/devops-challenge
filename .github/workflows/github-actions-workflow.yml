@@ -4,6 +4,24 @@ on:
     branches: [ "main" ]
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      defaultBump:
+        description: 'Which type of bump to use when none explicitly provided'
+        required: true
+        default: 'patch' 
+        type: choice
+        options:
+        - major
+        - minor
+        - patch 
+      createRelease:
+        description: 'True to create new release & tag with version'
+        required: true 
+        type: boolean 
+      publishPackage:
+        description: 'True to publish package to GitHub Packages'
+        required: true 
+        type: boolean 
 jobs:
   Initialization:
     runs-on: ubuntu-latest
@@ -19,7 +37,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERBOSE: true
           DRY_RUN: true
-          DEFAULT_BUMP: patch
+          DEFAULT_BUMP: ${{ inputs.defaultBump}}
   Build:
     runs-on: ubuntu-latest
     steps:
@@ -33,7 +51,7 @@ jobs:
       - name: Build with Maven
         run: mvn clean install
   Publish:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest    
     needs: [Initialization, Build]
     steps:
       - uses: actions/checkout@v3
@@ -43,24 +61,27 @@ jobs:
           distribution: 'adopt'
       - name: Set Release version
         run: mvn versions:set -DnewVersion=${{needs.Initialization.outputs.next_version}}
-      - name: Publish to GitHub Packages Apache Maven
+      - name: Publish to GitHub Packages Apache Maven 
+        if:  ${{ inputs.publishPackage != 'false'}}
         run: mvn --batch-mode -DuseGitHubPackages=true deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   Create_Release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest   
     needs: [Initialization, Publish]
     steps:
     - uses: actions/checkout@v3 
     - name: Print Next Tag
       run: echo ${{needs.Initialization.outputs.next_version}}
-    - name: Create a Release
+    - name: Create a Release  
+      if:  ${{ inputs.createRelease != 'false'}}
       uses: elgohr/Github-Release-Action@v4
       env:
         GITHUB_TOKEN: ${{ secrets.IMK_RELEASE_TOKEN }}
       with:
         title: ${{needs.Initialization.outputs.next_version}}
-    - name: Tag Version
+    - name: Tag Version 
+      if:  ${{ inputs.createRelease != 'false'}}
       uses: anothrNick/github-tag-action@1.39.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
