@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Determine Next Tag Version
-        if:  ${{ github.event.inputs.defaultBump == 'patch'}}
+        if:  ${{ github.event.inputs.defaultBump != 'patch'}}
         id: DetermineNextTagVersion
         uses: anothrNick/github-tag-action@1.39.0
         env:
@@ -92,6 +92,12 @@ jobs:
         title: ${{needs.Initialization.outputs.next_version}}
     - name: Tag Version 
       if:  ${{ github.event.inputs.createRelease != 'false'}}
+      uses: anothrNick/github-tag-action@1.39.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEFAULT_BUMP: patch
+    - name: Tag Version 
+      if:  ${{ github.event.inputs.createRelease != 'false'&& ${{ github.event.inputs.defaultBump != 'patch'}}}}
       uses: anothrNick/github-tag-action@1.39.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
