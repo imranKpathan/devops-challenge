@@ -16,10 +16,12 @@ on:
         description: 'True to create new release & tag with version'
         required: true 
         type: boolean 
+        default: 'true' 
       publishPackage:
         description: 'True to publish package to GitHub Packages'
         required: true 
         type: boolean 
+        default: 'true' 
 jobs:
   Initialization:
     runs-on: ubuntu-latest
