@@ -8,7 +8,7 @@ on:
       defaultBump:
         description: 'Which type of bump to use when none explicitly provided'
         required: true
-        default: 'patch' 
+        default: 'minor' 
         type: choice
         options:
         - major
