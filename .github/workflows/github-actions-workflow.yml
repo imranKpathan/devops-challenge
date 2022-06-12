@@ -8,7 +8,7 @@ on:
       defaultBump:
         description: 'Which type of bump to use when none explicitly provided'
         required: true
-        default: 'patch' 
+        default: 'minor' 
         type: choice
         options:
         - major
@@ -31,14 +31,23 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Determine Next Tag Version
-        if:  ${{ inputs.defaultBump}}
+        if:  ${{ github.event.inputs.defaultBump == 'patch'}}
         id: DetermineNextTagVersion
         uses: anothrNick/github-tag-action@1.39.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERBOSE: true
           DRY_RUN: true
-          DEFAULT_BUMP: ${{ github.event.inputs.defaultBump != 'patch' }}
+          DEFAULT_BUMP: 'patch'
+      - name: Determine Next Tag Version
+        if:  ${{ github.event.inputs.defaultBump}}
+        id: DetermineNextTagVersion
+        uses: anothrNick/github-tag-action@1.39.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERBOSE: true
+          DRY_RUN: true
+          DEFAULT_BUMP: ${{ github.event.inputs.defaultBump}}
   Build:
     runs-on: ubuntu-latest
     steps:
