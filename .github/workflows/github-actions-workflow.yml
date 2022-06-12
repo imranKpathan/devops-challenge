@@ -31,14 +31,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Determine Next Tag Version
-        if:  ${{ inputs.defaultBump != 'patch'}}
+        if:  ${{ inputs.defaultBump}}
         id: DetermineNextTagVersion
         uses: anothrNick/github-tag-action@1.39.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERBOSE: true
           DRY_RUN: true
-          DEFAULT_BUMP: ${{ inputs.defaultBump}}
+          DEFAULT_BUMP: ${{ github.event.inputs.defaultBump != 'patch' }}
   Build:
     runs-on: ubuntu-latest
     steps:
@@ -63,7 +63,7 @@ jobs:
       - name: Set Release version
         run: mvn versions:set -DnewVersion=${{needs.Initialization.outputs.next_version}}
       - name: Publish to GitHub Packages Apache Maven 
-        if:  ${{ inputs.publishPackage != 'false'}}
+        if:  ${{ github.event.inputs.publishPackage != 'false'}}
         run: mvn --batch-mode -DuseGitHubPackages=true deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -75,15 +75,15 @@ jobs:
     - name: Print Next Tag
       run: echo ${{needs.Initialization.outputs.next_version}}
     - name: Create a Release  
-      if:  ${{ inputs.createRelease != 'false'}}
+      if:  ${{ github.event.inputs.createRelease != 'false'}}
       uses: elgohr/Github-Release-Action@v4
       env:
         GITHUB_TOKEN: ${{ secrets.IMK_RELEASE_TOKEN }}
       with:
         title: ${{needs.Initialization.outputs.next_version}}
     - name: Tag Version 
-      if:  ${{ inputs.createRelease != 'false'}}
+      if:  ${{ github.event.inputs.createRelease != 'false'}}
       uses: anothrNick/github-tag-action@1.39.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        DEFAULT_BUMP: ${{ inputs.defaultBump}}
+        DEFAULT_BUMP: ${{ github.event.inputs.defaultBump != 'patch' }}
