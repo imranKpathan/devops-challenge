@@ -1,9 +1,7 @@
 name: GitHub Actions Demo
 on:
-  #push:
-   # branches: [ "main" ]
-  #pull_request:
-   # branches: [ "main" ]
+  push:
+    branches: [ "main" ]
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 jobs:
@@ -46,8 +44,7 @@ jobs:
       - name: Set Release version
         run: mvn versions:set -DnewVersion=${{needs.initialization.outputs.next_version}}
       - name: Publish to GitHub Packages Apache Maven
-        run: echo 'Skipping publish stage.'
-        #run: mvn --batch-mode -DuseGitHubPackages=true deploy
+        run: mvn --batch-mode -DuseGitHubPackages=true deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   set_Release:
