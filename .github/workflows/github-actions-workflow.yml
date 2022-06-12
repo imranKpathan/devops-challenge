@@ -97,7 +97,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BUMP: patch
     - name: Tag Version 
-      if:  ${{ github.event.inputs.createRelease != 'false' && ${{ github.event.inputs.defaultBump != 'patch'}}
+      if:  ${{ github.event.inputs.createRelease != 'false'}} && ${{ github.event.inputs.defaultBump != 'patch'}}
       uses: anothrNick/github-tag-action@1.39.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
