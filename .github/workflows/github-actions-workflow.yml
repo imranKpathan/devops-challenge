@@ -5,15 +5,6 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
-      defaultBump:
-        description: 'Which type of bump to use when none explicitly provided'
-        required: true
-        default: 'minor' 
-        type: choice
-        options:
-        - major
-        - minor
-        - patch 
       createRelease:
         description: 'True to create new release & tag with version'
         required: true 
@@ -31,7 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Determine Next Tag Version
-        if:  ${{ github.event.inputs.defaultBump != 'patch'}}
         id: DetermineNextTagVersion
         uses: anothrNick/github-tag-action@1.39.0
         env:
@@ -39,15 +29,6 @@ jobs:
           VERBOSE: true
           DRY_RUN: true
           DEFAULT_BUMP: 'patch'
-      - name: Determine Next Tag Version
-        if:  ${{ github.event.inputs.defaultBump}}
-        id: DetermineNextTagVersion
-        uses: anothrNick/github-tag-action@1.39.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERBOSE: true
-          DRY_RUN: true
-          DEFAULT_BUMP: ${{ github.event.inputs.defaultBump}}
   Build:
     runs-on: ubuntu-latest
     steps:
@@ -97,8 +78,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BUMP: patch
     - name: Tag Version 
-      if:  ${{ github.event.inputs.createRelease != 'false'}} && ${{ github.event.inputs.defaultBump != 'patch'}}
+      if:  ${{ github.event.inputs.createRelease != 'false'}}
       uses: anothrNick/github-tag-action@1.39.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        DEFAULT_BUMP: ${{ github.event.inputs.defaultBump != 'patch' }}
+        DEFAULT_BUMP: 'patch'
